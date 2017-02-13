@@ -18,13 +18,15 @@ public class HeightWrapBitmapTarget implements Target {
     @Override
     public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
         float w = bitmap.getWidth();
+        int newHeight = bitmap.getHeight();
+        Bitmap scaled = bitmap;
+        if (w < width) {
+            double ratio = (double) width / w;
+            newHeight = (int) (bitmap.getHeight() * ratio);
+            scaled = Bitmap.createScaledBitmap(bitmap, width, newHeight, false);
+        }
 
-        double ratio = (double) width / w;
-        int newHeight = (int) (bitmap.getHeight() * ratio);
-
-        Bitmap scaled = Bitmap.createScaledBitmap(bitmap, width, newHeight, false);
-
-        imageView.setImageBitmap( scaled);
+        imageView.setImageBitmap(scaled);
         imageView.getLayoutParams().height = newHeight;
         imageView.getLayoutParams().width = width;
     }

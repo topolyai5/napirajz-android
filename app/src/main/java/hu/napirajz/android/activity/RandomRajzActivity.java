@@ -2,9 +2,11 @@ package hu.napirajz.android.activity;
 
 import android.media.Image;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -35,6 +37,7 @@ public class RandomRajzActivity extends AppCompatActivity {
     public Picasso picasso;
     private ImageView imageView;
     private ProgressBar progressBar;
+    private FloatingActionButton nextPic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,13 +66,21 @@ public class RandomRajzActivity extends AppCompatActivity {
 
         imageView = (ImageView) findViewById(R.id.napirajz_imageview);
         progressBar = (ProgressBar) findViewById(R.id.napirajz_loader);
+        nextPic = (FloatingActionButton) findViewById(R.id.next_pic);
 
+        nextPic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                load();
+            }
+        });
         load();
 
     }
 
     private void load() {
 
+        nextPic.setEnabled(false);
         progressBar.setVisibility(View.VISIBLE);
         imageView.setVisibility(View.GONE);
         napirajzRest.random()
@@ -84,6 +95,7 @@ public class RandomRajzActivity extends AppCompatActivity {
 
                         progressBar.setVisibility(View.GONE);
                         imageView.setVisibility(View.VISIBLE);
+                        nextPic.setEnabled(true);
 
 
                     }
@@ -94,6 +106,7 @@ public class RandomRajzActivity extends AppCompatActivity {
                         t.printStackTrace();
                         progressBar.setVisibility(View.GONE);
                         imageView.setVisibility(View.VISIBLE);
+                        nextPic.setEnabled(true);
                     }
                 });
     }
