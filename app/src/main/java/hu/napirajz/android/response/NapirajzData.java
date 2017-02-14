@@ -2,6 +2,7 @@ package hu.napirajz.android.response;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import lombok.Getter;
@@ -9,7 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NapirajzData {
+public class NapirajzData implements Serializable {
 
     @SerializedName("ID")
     private String id;
