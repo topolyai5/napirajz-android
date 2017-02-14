@@ -108,11 +108,9 @@ class RandomRajzActivity : AppCompatActivity() {
 
         observable
                 .subscribeOn(Schedulers.io())
-                .doAfterTerminate({ napiSearch = false })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : Observer<NapirajzResponse> {
                     override fun onCompleted() {
-
                     }
 
                     override fun onNext(t: NapirajzResponse?) {
@@ -125,6 +123,7 @@ class RandomRajzActivity : AppCompatActivity() {
                             setTitle(R.string.failed)
                         }
                         nextPic.isEnabled = true
+                        napiSearch = false
                     }
 
                     override fun onError(e: Throwable?) {
@@ -138,6 +137,7 @@ class RandomRajzActivity : AppCompatActivity() {
                         progressBar.visibility = View.GONE
                         imageView.visibility = View.VISIBLE
                         nextPic.isEnabled = true
+                        napiSearch = false
                     }
                 })
     }
@@ -177,8 +177,8 @@ class RandomRajzActivity : AppCompatActivity() {
         when (item.itemId) {
             dailyId -> {
                 val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                load(napirajzRest.daily(format, format))
                 napiSearch = true;
+                load(napirajzRest.daily(format, format))
                 return true
             }
         }
