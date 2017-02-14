@@ -2,10 +2,13 @@ package hu.napirajz.android.activity
 
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -28,7 +31,15 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import rx.Observable
+import rx.Observer
+import rx.Scheduler
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class RandomRajzActivity : AppCompatActivity() {
@@ -37,6 +48,8 @@ class RandomRajzActivity : AppCompatActivity() {
     lateinit var imageView: ImageView
     lateinit var progressBar: ProgressBar
     lateinit var nextPic: FloatingActionButton
+
+    var napiSearch = false
 
     private var lastNapirajzData: NapirajzData? = null
 
@@ -58,6 +71,7 @@ class RandomRajzActivity : AppCompatActivity() {
 
         val retrofit = Retrofit.Builder()
                 .baseUrl(Const.BASE_URL)
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory
                         .create(GsonBuilder()
                                 .registerTypeAdapter(NapirajzResponse::class.java, NapirajzDeserializer())
@@ -71,42 +85,54 @@ class RandomRajzActivity : AppCompatActivity() {
         progressBar = find<ProgressBar>(R.id.napirajz_loader)
         nextPic = find<FloatingActionButton>(R.id.next_pic)
 
-        nextPic.setOnClickListener { load() }
+        nextPic.setOnClickListener {
+            load(napirajzRest.random())
+            napiSearch = false
+        }
 
         if (savedInstanceState != null) {
             lastNapirajzData = savedInstanceState.getSerializable(NAPIRAJZ) as NapirajzData
         }
         if (lastNapirajzData == null) {
-            load()
+            load(napirajzRest.random())
         } else {
             loadPicture()
         }
     }
 
-    private fun load() {
+    private fun load(observable: Observable<NapirajzResponse>) {
 
-        nextPic.isEnabled = false
-        progressBar.visibility = View.VISIBLE
-        imageView.visibility = View.GONE
-        napirajzRest.random()
-                .enqueue(object : Callback<NapirajzResponse> {
-                    override fun onResponse(call: Call<NapirajzResponse>, response: Response<NapirajzResponse>) {
-                        if (response.isSuccessful) {
-                            lastNapirajzData = response.body().data
+//        nextPic.isEnabled = false
+//        progressBar.visibility = View.VISIBLE
+//        imageView.visibility = View.GONE
+
+        observable
+                .subscribeOn(Schedulers.io())
+                .doAfterTerminate({ })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : Observer<NapirajzResponse> {
+                    override fun onCompleted() {
+                        progressBar.visibility = View.GONE
+                        imageView.visibility = View.VISIBLE
+                        nextPic.isEnabled = true
+                    }
+
+                    override fun onNext(t: NapirajzResponse?) {
+                        if (t != null) {
+                            lastNapirajzData = t.data
                             loadPicture()
                         } else {
                             setTitle(R.string.failed)
                         }
-
                     }
 
-                    override fun onFailure(call: Call<NapirajzResponse>, t: Throwable) {
-                        Toast.makeText(this@RandomRajzActivity, t.message, Toast.LENGTH_SHORT).show()
-                        t.printStackTrace()
-                        progressBar.visibility = View.GONE
-                        imageView.visibility = View.VISIBLE
-                        nextPic.isEnabled = true
-                        setTitle(R.string.failed)
+                    override fun onError(e: Throwable?) {
+                        if (!napiSearch) {
+                            Toast.makeText(this@RandomRajzActivity, "E! Baj van!", Toast.LENGTH_SHORT).show()
+                            setTitle(R.string.failed)
+                        } else {
+                            Toast.makeText(this@RandomRajzActivity, R.string.daily_not_found, Toast.LENGTH_SHORT).show()
+                        }
                     }
                 })
     }
@@ -132,6 +158,26 @@ class RandomRajzActivity : AppCompatActivity() {
 
     companion object {
         val NAPIRAJZ = "napirajz"
+        val dailyId = 1
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val daily = menu.add(Menu.NONE, 1, Menu.NONE, "Napi")
+        daily.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        daily.icon = ContextCompat.getDrawable(this, R.drawable.e_question)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            dailyId -> {
+                val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                load(napirajzRest.daily(format, format))
+                napiSearch = true;
+                return true
+            }
+        }
+        return false
     }
 
 }
