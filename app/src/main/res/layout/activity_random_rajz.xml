@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_fast_forward_black_24dp"
+        android:src="@drawable/ic_fast_forward_black_48dp"
         app:backgroundTint="@color/colorPrimary"
         app:layout_behavior="hu.napirajz.android.FabScrollBehavior"
         app:fabSize="normal" />

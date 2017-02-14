@@ -1,7 +1,10 @@
 package hu.napirajz.android.activity
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -27,6 +30,7 @@ import hu.napirajz.android.rest.NapirajzRest
 import kotlinx.android.synthetic.main.activity_random_rajz.*
 import okhttp3.OkHttpClient
 import org.jetbrains.anko.find
+import org.jetbrains.anko.onClick
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -119,6 +123,18 @@ class RandomRajzActivity : AppCompatActivity() {
                             imageView.visibility = View.GONE
                             lastNapirajzData = t.data
                             loadPicture()
+                            imageView.onClick {
+                                if (lastNapirajzData!!.lapUrl.isNotEmpty()) {
+                                    val intent = Intent()
+                                    intent.action = Intent.ACTION_VIEW
+                                    intent.addCategory(Intent.CATEGORY_BROWSABLE)
+                                    intent.data = Uri.parse(lastNapirajzData!!.lapUrl)
+                                    startActivity(intent)
+                                } else {
+                                    Toast.makeText(this@RandomRajzActivity, "Ez csak kép (lehet, hogy egy borító). Bocs.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+
                         } else {
                             setTitle(R.string.failed)
                         }
@@ -164,12 +180,18 @@ class RandomRajzActivity : AppCompatActivity() {
     companion object {
         val NAPIRAJZ = "napirajz"
         val dailyId = 1
+        val shareId = 2
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val daily = menu.add(Menu.NONE, 1, Menu.NONE, "Napi")
+        val daily = menu.add(Menu.NONE, dailyId, Menu.NONE, "Napi")
         daily.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         daily.icon = ContextCompat.getDrawable(this, R.drawable.e_question)
+
+        val share = menu.add(Menu.NONE, shareId, Menu.NONE, "Megoszt")
+        share.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        share.icon = ContextCompat.getDrawable(this, R.drawable.ic_share_black_36dp)
+
         return true
     }
 
@@ -177,8 +199,12 @@ class RandomRajzActivity : AppCompatActivity() {
         when (item.itemId) {
             dailyId -> {
                 val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                napiSearch = true;
+                napiSearch = true
                 load(napirajzRest.daily(format, format))
+                return true
+            }
+            shareId -> {
+                share()
                 return true
             }
         }
@@ -193,6 +219,14 @@ class RandomRajzActivity : AppCompatActivity() {
 //        }
 
         scrollView.scrollTo(0, 0)
+    }
+
+    fun share() {
+        var sendIntent = Intent()
+        sendIntent.action = Intent.ACTION_SEND
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.")
+        sendIntent.type = "text/plain"
+        startActivity(Intent.createChooser(sendIntent, resources.getText(R.string.send_to)))
     }
 
 }
