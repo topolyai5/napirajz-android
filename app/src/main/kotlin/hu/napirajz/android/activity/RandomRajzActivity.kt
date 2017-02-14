@@ -125,6 +125,7 @@ class RandomRajzActivity : AppCompatActivity() {
                             loadPicture()
                             imageView.onClick {
                                 if (lastNapirajzData!!.lapUrl.isNotEmpty()) {
+                                    Toast.makeText(this@RandomRajzActivity, "Kösz Tibi/Klára!", Toast.LENGTH_SHORT).show()
                                     val intent = Intent()
                                     intent.action = Intent.ACTION_VIEW
                                     intent.addCategory(Intent.CATEGORY_BROWSABLE)
