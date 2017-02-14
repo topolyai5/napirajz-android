@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: "kotlin-android-extensions"
 
 android {
     compileSdkVersion 25
@@ -17,11 +19,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
 }
 
 ext {
     retrofitVersion = "2.1.0"
     supportLibVersion = "25.0.1"
+    ankoVersion = "0.9"
 }
 
 dependencies {
@@ -41,6 +48,13 @@ dependencies {
     compile "com.squareup.okhttp3:okhttp:3.4.1"
 
     compile 'com.google.code.gson:gson:2.4'
+
+    compile "io.reactivex:rxandroid:1.2.1"
+    compile "io.reactivex:rxjava:1.1.10"
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.anko:anko-sdk15:${ankoVersion}"
+    compile "org.jetbrains.anko:anko-appcompat-v7:${ankoVersion}"
 
     provided 'org.projectlombok:lombok:1.12.6'
 }
