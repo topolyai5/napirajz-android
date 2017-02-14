@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Napirajz Android</string>
     <string name="search_pic">Kép keresése</string>
-    <string name="failed">Nem sikerült a kép betöltése</string>
+    <string name="image_failed">Nem sikerült a kép betöltése</string>
+    <string name="failed">E! Baj van!</string>
     <string name="daily_not_found">Nincs mára Napirajz</string>
 </resources>

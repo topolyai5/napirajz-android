@@ -27,15 +27,11 @@ import hu.napirajz.android.rest.NapirajzRest
 import kotlinx.android.synthetic.main.activity_random_rajz.*
 import okhttp3.OkHttpClient
 import org.jetbrains.anko.find
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import rx.Observable
 import rx.Observer
-import rx.Scheduler
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import java.text.SimpleDateFormat
@@ -102,44 +98,53 @@ class RandomRajzActivity : AppCompatActivity() {
 
     private fun load(observable: Observable<NapirajzResponse>) {
 
-//        nextPic.isEnabled = false
-//        progressBar.visibility = View.VISIBLE
-//        imageView.visibility = View.GONE
+        //diable every request
+        nextPic.isEnabled = false
+        //if it's daily image, we should show load bar later time
+        if (!napiSearch) {
+            progressBar.visibility = View.VISIBLE
+            imageView.visibility = View.GONE
+        }
 
         observable
                 .subscribeOn(Schedulers.io())
-                .doAfterTerminate({ })
+                .doAfterTerminate({ napiSearch = false })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : Observer<NapirajzResponse> {
                     override fun onCompleted() {
-                        progressBar.visibility = View.GONE
-                        imageView.visibility = View.VISIBLE
-                        nextPic.isEnabled = true
+
                     }
 
                     override fun onNext(t: NapirajzResponse?) {
                         if (t != null) {
+                            progressBar.visibility = View.VISIBLE
+                            imageView.visibility = View.GONE
                             lastNapirajzData = t.data
                             loadPicture()
                         } else {
                             setTitle(R.string.failed)
                         }
+                        nextPic.isEnabled = true
                     }
 
                     override fun onError(e: Throwable?) {
                         if (!napiSearch) {
-                            Toast.makeText(this@RandomRajzActivity, "E! Baj van!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@RandomRajzActivity, R.string.failed, Toast.LENGTH_SHORT).show()
                             setTitle(R.string.failed)
                         } else {
                             Toast.makeText(this@RandomRajzActivity, R.string.daily_not_found, Toast.LENGTH_SHORT).show()
                         }
+
+                        progressBar.visibility = View.GONE
+                        imageView.visibility = View.VISIBLE
+                        nextPic.isEnabled = true
                     }
                 })
     }
 
     lateinit var target: Target
     private fun loadPicture() {
-        scrollView.scrollTo(0, 0)
+        scrollToTop()
         title = lastNapirajzData!!.cim
         val dm = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(dm)
@@ -178,6 +183,16 @@ class RandomRajzActivity : AppCompatActivity() {
             }
         }
         return false
+    }
+
+    fun scrollToTop() {
+//        val params = appbarLayout.layoutParams as CoordinatorLayout.LayoutParams
+//        val behavior = params.getBehavior() as AppBarLayout.Behavior?
+//        if (behavior != null) {
+//            behavior.onNestedPreScroll(activity_random_rajz, appbarLayout, scrollView, 0, 0, IntArray(2))
+//        }
+
+        scrollView.scrollTo(0, 0)
     }
 
 }
