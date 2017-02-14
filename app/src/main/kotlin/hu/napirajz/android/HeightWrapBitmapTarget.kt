@@ -9,8 +9,6 @@ import android.widget.ProgressBar
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 
-import lombok.AllArgsConstructor
-
 class HeightWrapBitmapTarget(var width: Int, var imageView: ImageView, var progressBar: ProgressBar) : Target {
 
     override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {

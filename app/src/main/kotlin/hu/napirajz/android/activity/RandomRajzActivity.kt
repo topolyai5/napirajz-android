@@ -13,6 +13,7 @@ import android.widget.Toast
 import com.google.gson.GsonBuilder
 import com.jakewharton.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
+import com.squareup.picasso.Target
 import hu.napirajz.android.Const
 import hu.napirajz.android.HeightWrapBitmapTarget
 import hu.napirajz.android.NapirajzDeserializer
@@ -110,6 +111,7 @@ class RandomRajzActivity : AppCompatActivity() {
                 })
     }
 
+    lateinit var target: Target
     private fun loadPicture() {
         scrollView.scrollTo(0, 0)
         title = lastNapirajzData!!.cim
@@ -117,9 +119,10 @@ class RandomRajzActivity : AppCompatActivity() {
         windowManager.defaultDisplay.getMetrics(dm)
         Log.w("asd", lastNapirajzData!!.url)
         nextPic.isEnabled = true
+        target = HeightWrapBitmapTarget(dm.widthPixels, imageView, progressBar)
         picasso.load(lastNapirajzData!!.url)
                 .placeholder(R.drawable.napirajz_logo48)
-                .into(HeightWrapBitmapTarget(dm.widthPixels, imageView, progressBar))
+                .into(target)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
