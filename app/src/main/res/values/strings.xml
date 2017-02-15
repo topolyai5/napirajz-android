@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Napirajz Android</string>
+    <string name="app_name">Napirajz</string>
     <string name="search_pic">Kép keresése</string>
     <string name="image_failed">Nem sikerült a kép betöltése</string>
     <string name="failed">E! Baj van!</string>

@@ -1,6 +1,7 @@
 package hu.napirajz.android.activity
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
@@ -57,8 +58,10 @@ class RandomRajzActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_random_rajz)
 
-        setSupportActionBar(find<Toolbar>(R.id.toolbar))
+        val toolbar = find<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
         setTitle(R.string.search_pic)
+        toolbar.setTitleTextColor(Color.BLACK)
 
         val client = OkHttpClient().newBuilder()
                 .connectTimeout(10, TimeUnit.SECONDS)
