@@ -1,11 +1,13 @@
 package hu.napirajz.android.activity
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.DisplayMetrics
@@ -211,7 +213,15 @@ class RandomRajzActivity : AppCompatActivity() {
                 return true
             }
             shareId -> {
-                share()
+                AlertDialog.Builder(this)
+                        .setMessage("Melyiket akarod megosztani?")
+                        .setPositiveButton("Csak kép", { dialogInterface, i ->
+                            share(lastNapirajzData!!.url, "image/jpeg")
+                        })
+                        .setNeutralButton("A weboldalt", { dialogInterface, i ->
+                            share(lastNapirajzData!!.lapUrl, "text/plain")
+                        })
+                        .show()
                 return true
             }
         }
@@ -228,11 +238,11 @@ class RandomRajzActivity : AppCompatActivity() {
         scrollView.scrollTo(0, 0)
     }
 
-    fun share() {
+    fun share(extra: String, mimeType: String) {
         var sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
-        sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.")
-        sendIntent.type = "text/plain"
+        sendIntent.putExtra(Intent.EXTRA_TEXT, extra)
+        sendIntent.type = mimeType
         startActivity(Intent.createChooser(sendIntent, resources.getText(R.string.send_to)))
     }
 
