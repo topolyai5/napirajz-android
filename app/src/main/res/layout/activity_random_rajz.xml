@@ -24,14 +24,28 @@
     <android.support.v4.widget.NestedScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
-        <ImageView
-            android:id="@+id/napirajz_imageview"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/intro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@android:color/darker_gray"
+                android:layout_margin="16dp"
+                android:dividerHeight="0.5dp" />
+
+            <ImageView
+                android:id="@+id/napirajz_imageview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
 
 
     </android.support.v4.widget.NestedScrollView>
@@ -57,8 +71,8 @@
         android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/ic_fast_forward_black_48dp"
         app:backgroundTint="@color/colorPrimary"
-        app:layout_behavior="hu.napirajz.android.FabScrollBehavior"
-        app:fabSize="normal" />
+        app:fabSize="normal"
+        app:layout_behavior="hu.napirajz.android.FabScrollBehavior" />
 
 
 </android.support.design.widget.CoordinatorLayout>

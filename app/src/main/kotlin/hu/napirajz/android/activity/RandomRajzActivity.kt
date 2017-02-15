@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -14,22 +13,18 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import com.google.gson.GsonBuilder
 import com.jakewharton.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
-import hu.napirajz.android.Const
-import hu.napirajz.android.HeightWrapBitmapTarget
-import hu.napirajz.android.NapirajzDeserializer
-import hu.napirajz.android.R
+import hu.napirajz.android.*
 import hu.napirajz.android.response.NapirajzData
 import hu.napirajz.android.response.NapirajzResponse
 import hu.napirajz.android.rest.NapirajzRest
 import kotlinx.android.synthetic.main.activity_random_rajz.*
 import okhttp3.OkHttpClient
+import org.jetbrains.anko.expandableListView
 import org.jetbrains.anko.find
 import org.jetbrains.anko.onClick
 import retrofit2.Retrofit
@@ -101,11 +96,12 @@ class RandomRajzActivity : AppCompatActivity() {
         } else {
             loadPicture()
         }
+
     }
 
     private fun load(observable: Observable<NapirajzResponse>) {
 
-        //diable every request
+        //disable on every request
         nextPic.isEnabled = false
         //if it's daily image, we should show load bar later time
         if (!napiSearch) {
@@ -169,11 +165,18 @@ class RandomRajzActivity : AppCompatActivity() {
         val dm = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(dm)
         Log.w("asd", lastNapirajzData!!.url)
+        if (lastNapirajzData!!.egyeb.isEmpty()) {
+            intro.visibility = View.GONE
+        } else {
+            intro.text = lastNapirajzData!!.egyeb
+            intro.visibility = View.VISIBLE
+        }
         nextPic.isEnabled = true
         target = HeightWrapBitmapTarget(dm.widthPixels, imageView, progressBar)
         picasso.load(lastNapirajzData!!.url)
                 .placeholder(R.drawable.napirajz_logo48)
                 .into(target)
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
