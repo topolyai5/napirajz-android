@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -44,7 +45,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class RandomRajzActivity : AppCompatActivity() {
+class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
+
     lateinit var napirajzRest: NapirajzRest
     lateinit var picasso: Picasso
 
@@ -96,12 +98,13 @@ class RandomRajzActivity : AppCompatActivity() {
             loadPicture()
         }
 
+        refreshImage.setOnRefreshListener(this)
 //        imageView.setOnTouchListener(ZoomInZoomOut())
 
     }
 
     private fun load(observable: Observable<NapirajzResponse>) {
-
+        refreshImage.isRefreshing = false
         //disable on every request
         nextImage.isEnabled = false
         //if it's daily image, we should show load bar later time
@@ -244,6 +247,10 @@ class RandomRajzActivity : AppCompatActivity() {
         sendIntent.putExtra(Intent.EXTRA_TEXT, extra)
         sendIntent.type = mimeType
         startActivity(Intent.createChooser(sendIntent, resources.getText(R.string.send_to)))
+    }
+
+    override fun onRefresh() {
+        load(napirajzRest.random())
     }
 
 }
