@@ -1,4 +1,4 @@
-package hu.napirajz.android;
+package hu.napirajz.android.zoom;
 
 import android.app.Activity;
 import android.graphics.Matrix;

@@ -1,4 +1,4 @@
-package hu.napirajz.android
+package hu.napirajz.android.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
 import android.widget.TextView
+import hu.napirajz.android.R
 
 class OneChildExpandableAdapter(val context: Context, val text: String) : BaseExpandableListAdapter() {
 

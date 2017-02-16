@@ -1,4 +1,4 @@
-package hu.napirajz.android;
+package hu.napirajz.android.zoom;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PointF;

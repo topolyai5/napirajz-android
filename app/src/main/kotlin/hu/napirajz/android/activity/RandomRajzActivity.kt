@@ -22,13 +22,12 @@ import com.google.gson.GsonBuilder
 import com.jakewharton.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
-import hu.napirajz.android.Const
-import hu.napirajz.android.HeightWrapBitmapTarget
-import hu.napirajz.android.NapirajzDeserializer
 import hu.napirajz.android.R
 import hu.napirajz.android.response.NapirajzData
 import hu.napirajz.android.response.NapirajzResponse
 import hu.napirajz.android.rest.NapirajzRest
+import hu.napirajz.android.serializer.NapirajzDeserializer
+import hu.napirajz.android.transformation.HeightWrapBitmapTarget
 import kotlinx.android.synthetic.main.activity_random_rajz.*
 import okhttp3.OkHttpClient
 import org.jetbrains.anko.find
@@ -73,7 +72,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
                 .build()
 
         val retrofit = Retrofit.Builder()
-                .baseUrl(Const.BASE_URL)
+                .baseUrl(BASE_URL)
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory
                         .create(GsonBuilder()
@@ -199,6 +198,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
         val NAPIRAJZ = "napirajz"
         val dailyId = 1
         val shareId = 2
+        val BASE_URL = "http://kereso.napirajz.hu/"
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -242,7 +242,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
     }
 
     fun share(extra: String, mimeType: String) {
-        var sendIntent = Intent()
+        val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
         sendIntent.putExtra(Intent.EXTRA_TEXT, extra)
         sendIntent.type = mimeType

@@ -1,4 +1,4 @@
-package hu.napirajz.android
+package hu.napirajz.android.serializer
 
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
