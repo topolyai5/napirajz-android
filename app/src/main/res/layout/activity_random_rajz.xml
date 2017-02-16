@@ -41,7 +41,7 @@
                 android:dividerHeight="0.5dp" />
 
             <ImageView
-                android:id="@+id/napirajz_imageview"
+                android:id="@+id/imageView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
@@ -55,7 +55,7 @@
         android:layout_height="match_parent">
 
         <ProgressBar
-            android:id="@+id/napirajz_loader"
+            android:id="@+id/nextImageLoader"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_gravity="center"
@@ -64,7 +64,7 @@
     </FrameLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/next_pic"
+        android:id="@+id/nextImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"

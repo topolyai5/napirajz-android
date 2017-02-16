@@ -1,11 +1,9 @@
 package hu.napirajz.android.activity
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -15,7 +13,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.*
+import android.widget.Toast
 import com.google.gson.GsonBuilder
 import com.jakewharton.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
@@ -26,7 +24,6 @@ import hu.napirajz.android.response.NapirajzResponse
 import hu.napirajz.android.rest.NapirajzRest
 import kotlinx.android.synthetic.main.activity_random_rajz.*
 import okhttp3.OkHttpClient
-import org.jetbrains.anko.expandableListView
 import org.jetbrains.anko.find
 import org.jetbrains.anko.onClick
 import retrofit2.Retrofit
@@ -43,9 +40,6 @@ import java.util.concurrent.TimeUnit
 class RandomRajzActivity : AppCompatActivity() {
     lateinit var napirajzRest: NapirajzRest
     lateinit var picasso: Picasso
-    lateinit var imageView: ImageView
-    lateinit var progressBar: ProgressBar
-    lateinit var nextPic: FloatingActionButton
 
     var napiSearch = false
 
@@ -81,11 +75,7 @@ class RandomRajzActivity : AppCompatActivity() {
 
         napirajzRest = retrofit.create(NapirajzRest::class.java)
 
-        imageView = find<ImageView>(R.id.napirajz_imageview)
-        progressBar = find<ProgressBar>(R.id.napirajz_loader)
-        nextPic = find<FloatingActionButton>(R.id.next_pic)
-
-        nextPic.setOnClickListener {
+        nextImage.setOnClickListener {
             load(napirajzRest.random())
             napiSearch = false
         }
@@ -99,15 +89,17 @@ class RandomRajzActivity : AppCompatActivity() {
             loadPicture()
         }
 
+//        imageView.setOnTouchListener(ZoomInZoomOut())
+
     }
 
     private fun load(observable: Observable<NapirajzResponse>) {
 
         //disable on every request
-        nextPic.isEnabled = false
+        nextImage.isEnabled = false
         //if it's daily image, we should show load bar later time
         if (!napiSearch) {
-            progressBar.visibility = View.VISIBLE
+            nextImageLoader.visibility = View.VISIBLE
             imageView.visibility = View.GONE
         }
 
@@ -120,7 +112,7 @@ class RandomRajzActivity : AppCompatActivity() {
 
                     override fun onNext(t: NapirajzResponse?) {
                         if (t != null) {
-                            progressBar.visibility = View.VISIBLE
+                            nextImageLoader.visibility = View.VISIBLE
                             imageView.visibility = View.GONE
                             lastNapirajzData = t.data
                             loadPicture()
@@ -140,7 +132,7 @@ class RandomRajzActivity : AppCompatActivity() {
                         } else {
                             setTitle(R.string.failed)
                         }
-                        nextPic.isEnabled = true
+                        nextImage.isEnabled = true
                         napiSearch = false
                     }
 
@@ -152,9 +144,9 @@ class RandomRajzActivity : AppCompatActivity() {
                             Toast.makeText(this@RandomRajzActivity, R.string.daily_not_found, Toast.LENGTH_SHORT).show()
                         }
 
-                        progressBar.visibility = View.GONE
+                        nextImageLoader.visibility = View.GONE
                         imageView.visibility = View.VISIBLE
-                        nextPic.isEnabled = true
+                        nextImage.isEnabled = true
                         napiSearch = false
                     }
                 })
@@ -173,8 +165,8 @@ class RandomRajzActivity : AppCompatActivity() {
             intro.text = lastNapirajzData!!.egyeb
             intro.visibility = View.VISIBLE
         }
-        nextPic.isEnabled = true
-        target = HeightWrapBitmapTarget(dm.widthPixels, imageView, progressBar)
+        nextImage.isEnabled = true
+        target = HeightWrapBitmapTarget(dm.widthPixels, imageView, nextImageLoader)
         picasso.load(lastNapirajzData!!.url)
                 .placeholder(R.drawable.napirajz_logo48)
                 .into(target)
