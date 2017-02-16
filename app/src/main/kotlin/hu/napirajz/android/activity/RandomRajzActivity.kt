@@ -22,6 +22,7 @@ import com.google.gson.GsonBuilder
 import com.jakewharton.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
+import hu.napirajz.android.HistoryService
 import hu.napirajz.android.R
 import hu.napirajz.android.response.NapirajzData
 import hu.napirajz.android.response.NapirajzResponse
@@ -48,16 +49,14 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
 
     lateinit var napirajzRest: NapirajzRest
     lateinit var picasso: Picasso
+    val historyService = HistoryService()
 
     var napiSearch = false
-
-    private var lastNapirajzData: NapirajzData? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_random_rajz)
 
-        val toolbar = find<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         setTitle(R.string.search_pic)
         toolbar.setTitleTextColor(Color.BLACK)
@@ -89,12 +88,25 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
         }
 
         if (savedInstanceState != null) {
-            lastNapirajzData = savedInstanceState.getSerializable(NAPIRAJZ) as NapirajzData
+            historyService.fromSaveInstance(savedInstanceState.getSerializable(NAPIRAJZ) as Stack<NapirajzData>)
         }
-        if (lastNapirajzData == null) {
+        if (historyService.isEmpty()) {
             load(napirajzRest.random())
         } else {
             loadPicture()
+        }
+
+        if (historyService.hasPrevious()) {
+            toolbar.navigationIcon = ContextCompat.getDrawable(this, R.drawable.ic_keyboard_arrow_left_black_24dp)
+        }
+
+        toolbar.setNavigationOnClickListener {
+            historyService.previous()
+            loadPicture()
+
+            if (!historyService.hasPrevious()) {
+                toolbar.navigationIcon = null
+            }
         }
 
         refreshImage.setOnRefreshListener(this)
@@ -123,15 +135,18 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
                         if (t != null) {
                             nextImageLoader.visibility = View.VISIBLE
                             imageView.visibility = View.GONE
-                            lastNapirajzData = t.data
+                            historyService.add(t.data)
+                            if (historyService.hasPrevious()) {
+                                toolbar.navigationIcon = ContextCompat.getDrawable(this@RandomRajzActivity, R.drawable.ic_keyboard_arrow_left_black_24dp)
+                            }
                             loadPicture()
                             imageView.onLongClick {
-                                if (lastNapirajzData!!.lapUrl.isNotEmpty()) {
+                                if (historyService.current().lapUrl.isNotEmpty()) {
                                     Toast.makeText(this@RandomRajzActivity, "Kösz Tibi/Klára!", Toast.LENGTH_SHORT).show()
                                     val intent = Intent()
                                     intent.action = Intent.ACTION_VIEW
                                     intent.addCategory(Intent.CATEGORY_BROWSABLE)
-                                    intent.data = Uri.parse(lastNapirajzData!!.lapUrl)
+                                    intent.data = Uri.parse(historyService.current().lapUrl)
                                     startActivity(intent)
                                 } else {
                                     Toast.makeText(this@RandomRajzActivity, "Ez csak kép (lehet, hogy egy borító). Bocs.", Toast.LENGTH_SHORT).show()
@@ -141,7 +156,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
 
                             imageView.onClick {
                                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                val clip = ClipData.newPlainText("Napirajz", lastNapirajzData!!.url);
+                                val clip = ClipData.newPlainText("Napirajz", historyService.current().url);
                                 clipboard.setPrimaryClip(clip);
                             }
 
@@ -169,21 +184,22 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
     }
 
     lateinit var target: Target
+
     private fun loadPicture() {
         scrollToTop()
-        title = lastNapirajzData!!.cim
+        title = historyService.current().cim
         val dm = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(dm)
-        Log.w("asd", lastNapirajzData!!.url)
-        if (lastNapirajzData!!.egyeb.isEmpty()) {
+        Log.w("asd", historyService.current().url)
+        if (historyService.current().egyeb.isEmpty()) {
             intro.visibility = View.GONE
         } else {
-            intro.text = lastNapirajzData!!.egyeb
+            intro.text = historyService.current().egyeb
             intro.visibility = View.VISIBLE
         }
         nextImage.isEnabled = true
         target = HeightWrapBitmapTarget(dm.widthPixels, imageView, nextImageLoader)
-        picasso.load(lastNapirajzData!!.url)
+        picasso.load(historyService.current().url)
                 .placeholder(R.drawable.napirajz_logo48)
                 .into(target)
 
@@ -191,7 +207,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putSerializable(NAPIRAJZ, lastNapirajzData)
+        outState.putSerializable(NAPIRAJZ, historyService.forSaveInstance())
     }
 
     companion object {
@@ -225,10 +241,10 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
                 AlertDialog.Builder(this)
                         .setMessage("Melyiket akarod megosztani?")
                         .setPositiveButton("Csak kép", { dialogInterface, i ->
-                            share(lastNapirajzData!!.url, "text/plain")
+                            share(historyService.current().url, "text/plain")
                         })
                         .setNeutralButton("A szájt", { dialogInterface, i ->
-                            share(lastNapirajzData!!.lapUrl, "text/plain")
+                            share(historyService.current().lapUrl, "text/plain")
                         })
                         .show()
                 return true
