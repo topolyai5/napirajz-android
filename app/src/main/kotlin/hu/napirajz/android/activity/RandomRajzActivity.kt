@@ -1,5 +1,8 @@
 package hu.napirajz.android.activity
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -18,7 +21,10 @@ import com.google.gson.GsonBuilder
 import com.jakewharton.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
-import hu.napirajz.android.*
+import hu.napirajz.android.Const
+import hu.napirajz.android.HeightWrapBitmapTarget
+import hu.napirajz.android.NapirajzDeserializer
+import hu.napirajz.android.R
 import hu.napirajz.android.response.NapirajzData
 import hu.napirajz.android.response.NapirajzResponse
 import hu.napirajz.android.rest.NapirajzRest
@@ -129,6 +135,12 @@ class RandomRajzActivity : AppCompatActivity() {
                                     Toast.makeText(this@RandomRajzActivity, "Ez csak kép (lehet, hogy egy borító). Bocs.", Toast.LENGTH_SHORT).show()
                                 }
                                 true
+                            }
+
+                            imageView.onClick {
+                                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("Napirajz", lastNapirajzData!!.url);
+                                clipboard.setPrimaryClip(clip);
                             }
 
                         } else {
