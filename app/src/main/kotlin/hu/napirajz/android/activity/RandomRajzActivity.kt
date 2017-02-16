@@ -26,6 +26,7 @@ import kotlinx.android.synthetic.main.activity_random_rajz.*
 import okhttp3.OkHttpClient
 import org.jetbrains.anko.find
 import org.jetbrains.anko.onClick
+import org.jetbrains.anko.onLongClick
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -116,7 +117,7 @@ class RandomRajzActivity : AppCompatActivity() {
                             imageView.visibility = View.GONE
                             lastNapirajzData = t.data
                             loadPicture()
-                            imageView.onClick {
+                            imageView.onLongClick {
                                 if (lastNapirajzData!!.lapUrl.isNotEmpty()) {
                                     Toast.makeText(this@RandomRajzActivity, "Kösz Tibi/Klára!", Toast.LENGTH_SHORT).show()
                                     val intent = Intent()
@@ -127,6 +128,7 @@ class RandomRajzActivity : AppCompatActivity() {
                                 } else {
                                     Toast.makeText(this@RandomRajzActivity, "Ez csak kép (lehet, hogy egy borító). Bocs.", Toast.LENGTH_SHORT).show()
                                 }
+                                true
                             }
 
                         } else {
@@ -208,9 +210,9 @@ class RandomRajzActivity : AppCompatActivity() {
                 AlertDialog.Builder(this)
                         .setMessage("Melyiket akarod megosztani?")
                         .setPositiveButton("Csak kép", { dialogInterface, i ->
-                            share(lastNapirajzData!!.url, "image/jpeg")
+                            share(lastNapirajzData!!.url, "text/plain")
                         })
-                        .setNeutralButton("A weboldalt", { dialogInterface, i ->
+                        .setNeutralButton("A szájt", { dialogInterface, i ->
                             share(lastNapirajzData!!.lapUrl, "text/plain")
                         })
                         .show()
