@@ -235,12 +235,6 @@ class RandomRajzActivity : AppCompatActivity() {
     }
 
     fun scrollToTop() {
-//        val params = appbarLayout.layoutParams as CoordinatorLayout.LayoutParams
-//        val behavior = params.getBehavior() as AppBarLayout.Behavior?
-//        if (behavior != null) {
-//            behavior.onNestedPreScroll(activity_random_rajz, appbarLayout, scrollView, 0, 0, IntArray(2))
-//        }
-
         scrollView.scrollTo(0, 0)
     }
 
