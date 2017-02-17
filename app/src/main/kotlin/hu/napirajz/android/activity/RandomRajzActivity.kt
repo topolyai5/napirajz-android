@@ -48,6 +48,9 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
     companion object {
         val NAPIRAJZ = "napirajz"
         val RESULT = "result"
+        val SHOW_SEARCH = "search"
+        val SEARCH_TEXT = "search_text"
+        val SHOW_SHARE = "share"
         val dailyId = 1
         val shareId = 2
         val searchId = 3
@@ -59,9 +62,14 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
     val historyService = HistoryService()
     val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-    var napiSearch = false
 
-    var resultSearch : ArrayList<NapirajzData>? = null
+    var showShareDialog = false
+    var showSearchDialog = false
+    var searchText = ""
+    var napiSearch = false
+    var searctEdit: EditText? = null
+
+    var resultSearch: ArrayList<NapirajzData>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,6 +112,11 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
             if (resultSerializable != null) {
                 resultSearch = resultSerializable as ArrayList<NapirajzData>
             }
+
+            showSearchDialog = savedInstanceState.getBoolean(SHOW_SEARCH, false)
+            showShareDialog = savedInstanceState.getBoolean(SHOW_SHARE, false)
+
+            searchText = savedInstanceState.getString(SEARCH_TEXT, "")
         }
 
         if (resultSearch != null && resultSearch!!.isNotEmpty()) {
@@ -127,6 +140,13 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
             if (!historyService.hasPrevious()) {
                 toolbar.navigationIcon = null
             }
+        }
+
+        if (showSearchDialog) {
+            showSearchDialog()
+        }
+        if (showShareDialog) {
+            showShareDialog()
         }
 
         refreshImage.setOnRefreshListener(this)
@@ -234,6 +254,14 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
         } else {
             outState.remove(RESULT)
         }
+
+        outState.putBoolean(SHOW_SHARE, showShareDialog)
+        outState.putBoolean(SHOW_SEARCH, showSearchDialog)
+
+        if (searctEdit != null) {
+            outState.putString(SEARCH_TEXT, searctEdit!!.text.toString())
+        }
+
     }
 
 
@@ -262,34 +290,59 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
                 return true
             }
             shareId -> {
-                AlertDialog.Builder(this)
-                        .setMessage("Melyiket akarod megosztani?")
-                        .setPositiveButton("Csak kép", { dialogInterface, i ->
-                            share(historyService.current().url, "text/plain")
-                        })
-                        .setNeutralButton("A szájt", { dialogInterface, i ->
-                            share(historyService.current().lapUrl, "text/plain")
-                        })
-                        .show()
+                showShareDialog()
+                showShareDialog = true
+                showSearchDialog = false
                 return true
             }
             searchId -> {
-                AlertDialog.Builder(this)
-                        .setView(R.layout.search_dialog)
-                        .setNeutralButton("Téves", null)
-                        .setPositiveButton("Abort", { dialogInterface, i ->
-                            val editText = (dialogInterface as Dialog).findViewById(R.id.searchId) as EditText
-                            if (editText.text.isEmpty()) {
-                                Toast.makeText(this@RandomRajzActivity, "Ne bassz fel Tibi... Legalább 4!", Toast.LENGTH_SHORT).show()
-                            } else {
-                                search(editText.text.toString())
-                            }
-                        })
-                        .show()
+                showSearchDialog()
+                showSearchDialog = true
+                showShareDialog = false
                 return true
             }
         }
         return false
+    }
+
+    private fun showShareDialog() {
+        AlertDialog.Builder(this)
+                .setMessage("Melyiket akarod megosztani?")
+                .setPositiveButton("Csak kép", { dialogInterface, i ->
+                    share(historyService.current().url, "text/plain")
+                    showSearchDialog = false
+                })
+                .setNeutralButton("A szájt", { dialogInterface, i ->
+                    share(historyService.current().lapUrl, "text/plain")
+                    showSearchDialog = false
+                })
+                .setOnDismissListener {
+                    showShareDialog= false
+                }
+                .show()
+    }
+
+    private fun showSearchDialog() {
+        val inflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val view = inflater.inflate(R.layout.search_dialog, null)
+        searctEdit = view.findViewById(R.id.searchId) as EditText
+        searctEdit!!.setText(searchText)
+        AlertDialog.Builder(this)
+                .setView(view)
+                .setNeutralButton("Téves", null)
+                .setPositiveButton("Abort", { dialogInterface, i ->
+                    val editText = (dialogInterface as Dialog).findViewById(R.id.searchId) as EditText
+                    if (editText.text.isEmpty()) {
+                        Toast.makeText(this@RandomRajzActivity, "Ne bassz fel Tibi... Legalább 4!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        search(editText.text.toString())
+                    }
+                })
+                .setOnDismissListener {
+                    searchText = ""
+                    showSearchDialog = false
+                }
+                .show()
     }
 
     fun scrollToTop() {
@@ -353,7 +406,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
                         .placeholder(R.drawable.e_question)
                         .resize(dip(80), dip(80))
                         .centerCrop()
-                        .into(v.findViewById(R.id.resultImage)as ImageView)
+                        .into(v.findViewById(R.id.resultImage) as ImageView)
 
                 return v
             }
