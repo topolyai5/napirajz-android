@@ -1,5 +1,6 @@
 package hu.napirajz.android.activity
 
+import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -11,13 +12,10 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.Toast
+import android.view.*
+import android.widget.*
 import com.google.gson.GsonBuilder
 import com.jakewharton.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
@@ -31,7 +29,7 @@ import hu.napirajz.android.serializer.NapirajzDeserializer
 import hu.napirajz.android.transformation.HeightWrapBitmapTarget
 import kotlinx.android.synthetic.main.activity_random_rajz.*
 import okhttp3.OkHttpClient
-import org.jetbrains.anko.find
+import org.jetbrains.anko.dip
 import org.jetbrains.anko.onClick
 import org.jetbrains.anko.onLongClick
 import retrofit2.Retrofit
@@ -47,11 +45,23 @@ import java.util.concurrent.TimeUnit
 
 class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
 
+    companion object {
+        val NAPIRAJZ = "napirajz"
+        val RESULT = "result"
+        val dailyId = 1
+        val shareId = 2
+        val searchId = 3
+        val BASE_URL = "http://kereso.napirajz.hu/"
+    }
+
     lateinit var napirajzRest: NapirajzRest
     lateinit var picasso: Picasso
     val historyService = HistoryService()
+    val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
     var napiSearch = false
+
+    var resultSearch : ArrayList<NapirajzData>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,7 +99,17 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
 
         if (savedInstanceState != null) {
             historyService.fromSaveInstance(savedInstanceState.getSerializable(NAPIRAJZ) as Stack<NapirajzData>)
+
+            val resultSerializable = savedInstanceState.getSerializable(RESULT)
+            if (resultSerializable != null) {
+                resultSearch = resultSerializable as ArrayList<NapirajzData>
+            }
         }
+
+        if (resultSearch != null && resultSearch!!.isNotEmpty()) {
+            showSearchResult(resultSearch!!)
+        }
+
         if (historyService.isEmpty()) {
             load(napirajzRest.random())
         } else {
@@ -135,7 +155,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
                         if (t != null) {
                             nextImageLoader.visibility = View.VISIBLE
                             imageView.visibility = View.GONE
-                            historyService.add(t.data)
+                            historyService.add(t.data[0])
                             if (historyService.hasPrevious()) {
                                 toolbar.navigationIcon = ContextCompat.getDrawable(this@RandomRajzActivity, R.drawable.ic_keyboard_arrow_left_black_24dp)
                             }
@@ -188,6 +208,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
     private fun loadPicture() {
         scrollToTop()
         title = historyService.current().cim
+        titleText.text = historyService.current().cim + " - " + dateFormatter.format(historyService.current().datum)
         val dm = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(dm)
         Log.w("asd", historyService.current().url)
@@ -208,14 +229,13 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putSerializable(NAPIRAJZ, historyService.forSaveInstance())
+        if (resultSearch != null) {
+            outState.putSerializable(RESULT, resultSearch)
+        } else {
+            outState.remove(RESULT)
+        }
     }
 
-    companion object {
-        val NAPIRAJZ = "napirajz"
-        val dailyId = 1
-        val shareId = 2
-        val BASE_URL = "http://kereso.napirajz.hu/"
-    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val daily = menu.add(Menu.NONE, dailyId, Menu.NONE, "Napi")
@@ -226,13 +246,17 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
         share.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         share.icon = ContextCompat.getDrawable(this, R.drawable.ic_share_black_36dp)
 
+        val search = menu.add(Menu.NONE, searchId, Menu.NONE, "Abort")
+        search.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        search.icon = ContextCompat.getDrawable(this, R.drawable.ic_search_black_24dp)
+
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             dailyId -> {
-                val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                val format = dateFormatter.format(Date())
                 napiSearch = true
                 load(napirajzRest.daily(format, format))
                 return true
@@ -245,6 +269,21 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
                         })
                         .setNeutralButton("A szájt", { dialogInterface, i ->
                             share(historyService.current().lapUrl, "text/plain")
+                        })
+                        .show()
+                return true
+            }
+            searchId -> {
+                AlertDialog.Builder(this)
+                        .setView(R.layout.search_dialog)
+                        .setNeutralButton("Téves", null)
+                        .setPositiveButton("Abort", { dialogInterface, i ->
+                            val editText = (dialogInterface as Dialog).findViewById(R.id.searchId) as EditText
+                            if (editText.text.isEmpty()) {
+                                Toast.makeText(this@RandomRajzActivity, "Sok lesz... Legalább 4!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                search(editText.text.toString())
+                            }
                         })
                         .show()
                 return true
@@ -269,4 +308,76 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
         load(napirajzRest.random())
     }
 
+    fun search(text: String) {
+        napirajzRest.search(text)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : Observer<NapirajzResponse> {
+                    override fun onError(e: Throwable?) {
+                        Toast.makeText(this@RandomRajzActivity, R.string.failed, Toast.LENGTH_SHORT).show()
+                        setTitle(R.string.failed)
+                        e!!.printStackTrace()
+                    }
+
+                    override fun onCompleted() {
+
+                    }
+
+                    override fun onNext(t: NapirajzResponse) {
+                        showSearchResult(ArrayList(t.data))
+                        resultSearch = t.data
+                    }
+
+                })
+    }
+
+    private fun showSearchResult(data: ArrayList<NapirajzData>) {
+        if (data.isEmpty()) {
+            Toast.makeText(this@RandomRajzActivity, "Szultán nem találta...", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val inflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val view = inflater.inflate(R.layout.search_result_layout, null)
+        val listview = view.findViewById(R.id.searchResultListview) as ListView
+        val adapter = object : ArrayAdapter<NapirajzData>(this, R.layout.result_item_layout, data) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+                var v = convertView
+                if (convertView == null) {
+                    v = inflater.inflate(R.layout.result_item_layout, null)
+                }
+
+                val item = getItem(position)
+                (v!!.findViewById(R.id.resultTitle) as TextView).text = item.cim
+
+                picasso.load(item.url)
+                        .placeholder(R.drawable.e_question)
+                        .resize(dip(80), dip(80))
+                        .centerCrop()
+                        .into(v.findViewById(R.id.resultImage)as ImageView)
+
+                return v
+            }
+        }
+
+        val dialog = AlertDialog.Builder(this)
+                .setView(view)
+                .setOnDismissListener {
+                    resultSearch = null
+                }
+                .show()
+
+        listview.setOnItemClickListener { adapterView, view, i, l ->
+            val item = adapter.getItem(i)
+            historyService.add(item)
+            loadPicture()
+            dialog.dismiss()
+            nextImageLoader.visibility = View.VISIBLE
+            imageView.visibility = View.GONE
+            if (historyService.hasPrevious()) {
+                toolbar.navigationIcon = ContextCompat.getDrawable(this, R.drawable.ic_keyboard_arrow_left_black_24dp)
+            }
+        }
+
+        listview.adapter = adapter
+    }
 }
