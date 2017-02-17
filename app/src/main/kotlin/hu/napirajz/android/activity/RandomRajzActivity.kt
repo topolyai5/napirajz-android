@@ -280,7 +280,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
                         .setPositiveButton("Abort", { dialogInterface, i ->
                             val editText = (dialogInterface as Dialog).findViewById(R.id.searchId) as EditText
                             if (editText.text.isEmpty()) {
-                                Toast.makeText(this@RandomRajzActivity, "Sok lesz... Legalább 4!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@RandomRajzActivity, "Ne bassz fel Tibi... Legalább 4!", Toast.LENGTH_SHORT).show()
                             } else {
                                 search(editText.text.toString())
                             }
