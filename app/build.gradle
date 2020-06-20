@@ -11,7 +11,7 @@ android {
         targetSdkVersion 29
         versionCode 5
         versionName "1.4"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -32,12 +32,12 @@ ext {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestCompile('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation "com.android.support:design:${supportLibVersion}"
-    implementation "com.android.support:appcompat-v7:${supportLibVersion}"
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     testCompile 'junit:junit:4.12'
     implementation "com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0"
     implementation 'com.squareup.picasso:picasso:2.5.2'
