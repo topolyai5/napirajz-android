@@ -27,7 +27,7 @@ class HeightWrapBitmapTarget(var width: Int, var imageView: ImageView, var progr
         progressBar.visibility = View.GONE
     }
 
-    override fun onBitmapFailed(errorDrawable: Drawable) {
+    override fun onBitmapFailed(errorDrawable: Drawable?) {
         imageView.visibility = View.VISIBLE
         progressBar.visibility = View.GONE
 

@@ -3,12 +3,12 @@ apply plugin: 'kotlin-android'
 apply plugin: "kotlin-android-extensions"
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "hu.napirajz.android"
-        minSdkVersion 14
-        targetSdkVersion 25
+        minSdkVersion 15
+        targetSdkVersion 29
         versionCode 5
         versionName "1.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -27,8 +27,7 @@ android {
 
 ext {
     retrofitVersion = "2.1.0"
-    supportLibVersion = "25.0.1"
-    ankoVersion = "0.9"
+    supportLibVersion = "28.0.0"
 }
 
 dependencies {
@@ -36,27 +35,26 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    
-    compile "com.android.support:design:${supportLibVersion}"
-    compile "com.android.support:appcompat-v7:${supportLibVersion}"
+
+    implementation "com.android.support:design:${supportLibVersion}"
+    implementation "com.android.support:appcompat-v7:${supportLibVersion}"
     testCompile 'junit:junit:4.12'
-    compile "com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0"
-    compile 'com.squareup.picasso:picasso:2.5.2'
+    implementation "com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0"
+    implementation 'com.squareup.picasso:picasso:2.5.2'
 
-    compile "com.squareup.retrofit2:retrofit:${retrofitVersion}"
-    compile "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
-    compile "com.squareup.okhttp3:okhttp:3.4.1"
-    compile "com.squareup.retrofit2:adapter-rxjava:${retrofitVersion}"
+    implementation "com.squareup.retrofit2:retrofit:${retrofitVersion}"
+    implementation "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
+    implementation "com.squareup.okhttp3:okhttp:3.4.1"
+    implementation "com.squareup.retrofit2:adapter-rxjava:${retrofitVersion}"
 
-    compile 'com.google.code.gson:gson:2.4'
+    implementation 'com.google.code.gson:gson:2.4'
 
-    compile "io.reactivex:rxandroid:1.2.1"
-    compile "io.reactivex:rxjava:1.1.10"
-    compile "io.reactivex:rxkotlin:0.60.0"
+    implementation "io.reactivex:rxandroid:1.2.1"
+    implementation "io.reactivex:rxjava:1.1.10"
+    implementation "io.reactivex:rxkotlin:0.60.0"
 
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.anko:anko-sdk15:${ankoVersion}"
-    compile "org.jetbrains.anko:anko-appcompat-v7:${ankoVersion}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    provided 'org.projectlombok:lombok:1.12.6'
+    implementation "org.jetbrains.anko:anko-commons:$anko_version"
+    implementation "org.jetbrains.anko:anko:$anko_version"
 }

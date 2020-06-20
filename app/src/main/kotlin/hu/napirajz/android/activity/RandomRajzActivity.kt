@@ -1,13 +1,16 @@
 package hu.napirajz.android.activity
 
+import android.Manifest
 import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AlertDialog
@@ -30,8 +33,8 @@ import hu.napirajz.android.transformation.HeightWrapBitmapTarget
 import kotlinx.android.synthetic.main.activity_random_rajz.*
 import okhttp3.OkHttpClient
 import org.jetbrains.anko.dip
-import org.jetbrains.anko.onClick
-import org.jetbrains.anko.onLongClick
+import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.sdk27.coroutines.onLongClick
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -74,7 +77,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_random_rajz)
-
+        showRequestPermission()
         setSupportActionBar(toolbar)
         setTitle(R.string.search_pic)
         toolbar.setTitleTextColor(Color.BLACK)
@@ -86,6 +89,9 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
 
         picasso = Picasso.Builder(this)
                 .downloader(OkHttp3Downloader(client))
+                .listener { picasso, uri, exception ->
+                    Log.e("RandomRajz", "Cannot load picture: $uri" , exception)
+                }
                 .build()
 
         val retrofit = Retrofit.Builder()
@@ -317,7 +323,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
                     showSearchDialog = false
                 })
                 .setOnDismissListener {
-                    showShareDialog= false
+                    showShareDialog = false
                 }
                 .show()
     }
@@ -393,13 +399,13 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
         val view = inflater.inflate(R.layout.search_result_layout, null)
         val listview = view.findViewById(R.id.searchResultListview) as ListView
         val adapter = object : ArrayAdapter<NapirajzData>(this, R.layout.result_item_layout, data) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 var v = convertView
                 if (convertView == null) {
                     v = inflater.inflate(R.layout.result_item_layout, null)
                 }
 
-                val item = getItem(position)
+                val item = getItem(position)!!
                 (v!!.findViewById(R.id.resultTitle) as TextView).text = item.cim
 
                 picasso.load(item.url)
@@ -420,7 +426,7 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
                 .show()
 
         listview.setOnItemClickListener { adapterView, view, i, l ->
-            val item = adapter.getItem(i)
+            val item = adapter.getItem(i)!!
             historyService.add(item)
             loadPicture()
             dialog.dismiss()
@@ -432,5 +438,35 @@ class RandomRajzActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshList
         }
 
         listview.adapter = adapter
+    }
+
+    fun showRequestPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.INTERNET)) {
+            } else {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.INTERNET), 100)
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            100 -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return
+            }
+
+            // Add other 'when' lines to check for other
+            // permissions this app might request.
+            else -> {
+                // Ignore all other requests.
+            }
+        }
     }
 }

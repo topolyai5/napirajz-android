@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <!--<domain includeSubdomains="true">@string/server_url</domain>-->
+        <domain includeSubdomains="true">kereso.napirajz.hu</domain>
+        <domain includeSubdomains="true">kep.index.hu</domain>
+        <domain includeSubdomains="true">kep.cdn.indexvas.hu</domain>
+        <domain includeSubdomains="true">napirajz.hu</domain>
+        <domain includeSubdomains="true">kep.cdn.index.hu</domain>
+    </domain-config>
+</network-security-config>
