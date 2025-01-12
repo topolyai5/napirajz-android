@@ -1,21 +1,20 @@
 package hu.napirajz.android.rest
 
 import hu.napirajz.android.response.NapirajzResponse
-import retrofit2.Call
+import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
-import rx.Observable
 
 interface NapirajzRest {
 
     @GET("abort.php?guppi&json")
-    fun random(): Observable<NapirajzResponse>
+    fun random(): Single<NapirajzResponse>
 
     @GET("abort.php")
-    fun daily(@Query("tol") tol: String, @Query("ig") ig: String, @Query("n") n: Int = 1, @Query("json") json: String = ""): Observable<NapirajzResponse>
+    fun daily(@Query("tol") tol: String, @Query("ig") ig: String, @Query("n") n: Int = 1, @Query("json") json: String = ""): Single<NapirajzResponse>
 
     @POST("abort.php")
-    fun search(@Query("q") q: String, @Query("json") json: String = ""): Observable<NapirajzResponse>
+    fun search(@Query("q") q: String, @Query("json") json: String = ""): Single<NapirajzResponse>
 
 }
