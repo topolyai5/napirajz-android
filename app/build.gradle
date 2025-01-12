@@ -1,18 +1,42 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: "kotlin-android-extensions"
+plugins {
+    id 'com.android.application'
+    alias(libs.plugins.kotlinAndroid)
+    id 'kotlin-kapt'
+    id 'androidx.navigation.safeargs'
+    id 'de.mannodermaus.android-junit5'
+}
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+def releaseVersion = libs.versions.app.releaseVersion.get()
+def buildNumber = libs.versions.build.number.get()
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+    compileSdk 35
     defaultConfig {
-        applicationId "hu.napirajz.android"
-        minSdkVersion 15
-        targetSdkVersion 29
-        versionCode 5
+        minSdk 29
+        targetSdk 35
+        versionCode releaseVersion.toInteger()
+        versionName "2.0.0-b$buildNumber"
         versionName "1.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion libs.versions.compose.compiler.get()
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -20,41 +44,62 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17.majorVersion
+        freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+    }
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+    }
+    namespace "hu.napirajz.android"
+
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
 }
 
-ext {
-    retrofitVersion = "2.1.0"
-    supportLibVersion = "28.0.0"
-}
-
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('androidx.test.espresso:espresso-core:3.1.0', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
+    def composeBom = platform(libs.androidx.compose.bom)
 
-    implementation 'com.google.android.material:material:1.1.0'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    testCompile 'junit:junit:4.12'
-    implementation "com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0"
-    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation composeBom
+    implementation libs.androidx.activity.compose
+    implementation libs.material
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.lifecycle.livedata.ktx
+    implementation libs.androidx.lifecycle.viewmodel.ktx
+    implementation libs.androidx.navigation.compose
+    implementation libs.androidx.compose.material3
+    implementation libs.compose.ui.tooling.preview
+    debugImplementation libs.androidx.ui.tooling
+    testImplementation libs.junit.jupiter.api
+    testImplementation libs.junit.jupiter.engine
+    testImplementation libs.junit.jupiter.params
+    testImplementation libs.mockito
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.espresso.core
+    implementation libs.androidx.constraintlayout.compose
 
-    implementation "com.squareup.retrofit2:retrofit:${retrofitVersion}"
-    implementation "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
-    implementation "com.squareup.okhttp3:okhttp:3.4.1"
-    implementation "com.squareup.retrofit2:adapter-rxjava:${retrofitVersion}"
+    implementation libs.okhttp
+    implementation libs.retrofit2
+    implementation libs.moshi.kotlin
+    implementation libs.moshi.adapters
+    implementation libs.okhttp3.logging.interceptor
+    implementation libs.adapter.rxjava2
+    implementation libs.retrofit2.converter.moshi
+    implementation libs.retrofit2.converter.scalars
+    implementation libs.rxjava
+    implementation libs.rxandroid
 
-    implementation 'com.google.code.gson:gson:2.4'
+    implementation libs.jwtdecode
 
-    implementation "io.reactivex:rxandroid:1.2.1"
-    implementation "io.reactivex:rxjava:1.1.10"
-    implementation "io.reactivex:rxkotlin:0.60.0"
+    implementation libs.gson
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation(libs.coil.compose)
+    implementation(libs.coil.compose.network.okhttp)
 
-    implementation "org.jetbrains.anko:anko-commons:$anko_version"
-    implementation "org.jetbrains.anko:anko:$anko_version"
 }
