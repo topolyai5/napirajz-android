@@ -1,22 +1,22 @@
 package hu.napirajz.android.response
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 import java.io.Serializable
-import java.util.*
+import java.time.LocalDate
 
 data class NapirajzData(
-        @SerializedName("ID")
+        @Json(name = "ID")
         val id: String,
-        @SerializedName("Cim")
+        @Json(name = "Cim")
         val cim: String,
-        @SerializedName("Datum")
-        val datum: Date,
-        @SerializedName("URL")
+        @Json(name = "Datum")
+        val datum: LocalDate,
+        @Json(name = "URL")
         val url: String,
-        @SerializedName("LapURL")
-        val lapUrl: String,
-        @SerializedName("Parbeszed")
+        @Json(name = "LapURL")
+        val lapUrl: String?,
+        @Json(name = "Parbeszed")
         val parbeszed: String,
-        @SerializedName("Egyeb")
+        @Json(name = "Egyeb")
         val egyeb: String
 ) : Serializable

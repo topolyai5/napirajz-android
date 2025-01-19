@@ -6,7 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import hu.napirajz.android.provider.NavHostControllerProviders
-import hu.napirajz.android.screen.RandomRajzScreen
+import hu.napirajz.android.screen.ImageDetailsScreen
+import hu.napirajz.android.screen.MainScreen
 import hu.napirajz.android.theme.NapirajzTheme
 
 val LocalNavHostController = compositionLocalOf<NavHostController> { error("NavHostController Not Found!") }
@@ -15,8 +16,12 @@ val LocalNavHostController = compositionLocalOf<NavHostController> { error("NavH
 fun MainApp() {
     NapirajzTheme {
         NavHostControllerProviders { navController ->
-            NavHost(navController = navController, startDestination = "random") {
-                composable("random") { RandomRajzScreen() }
+            NavHost(navController = navController, startDestination = "main") {
+                composable("main") { MainScreen() }
+                composable("details/{id}") {
+                    val id = it.arguments?.getString("id")
+                    ImageDetailsScreen(id)
+                }
             }
         }
     }

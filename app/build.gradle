@@ -22,11 +22,11 @@ android {
     }
     compileSdk 35
     defaultConfig {
+        applicationId "hu.napirajz.android.new"
         minSdk 29
         targetSdk 35
         versionCode releaseVersion.toInteger()
-        versionName "2.0.0-b$buildNumber"
-        versionName "1.4"
+        versionName "2.3.0-b$buildNumber"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

@@ -1,6 +1,6 @@
 [versions]
-app-releaseVersion = "10"
-build-number = "1"
+app-releaseVersion = "12"
+build-number = "3"
 android-gradle-plugin = "8.6.1"
 androidx-activity = "1.9.3"
 androidx-compose-bom = "2024.12.01"

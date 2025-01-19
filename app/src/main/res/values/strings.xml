@@ -5,4 +5,9 @@
     <string name="failed">E! Baj van!</string>
     <string name="daily_not_found">Nincs mára Napirajz</string>
     <string name="send_to">Megoszt</string>
+    <string name="random">Random, mint a Guppi</string>
+    <string name="search">Abort</string>
+    <string name="share_pic">Kép megosztása</string>
+    <string name="share_page">Oldal megosztása</string>
+    <string name="scroll_to_more_image">"Görgess le az új képekért!"</string>
 </resources>
